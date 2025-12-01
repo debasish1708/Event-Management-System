@@ -153,7 +153,7 @@ Base URL examples (local):
 
 All protected by `auth:sanctum`.
 
-- **GET `/v1/events`**
+- **GET `/v1/api/events`**
 
   - **Query params (optional)**:
     - `page` (int)
@@ -166,11 +166,11 @@ All protected by `auth:sanctum`.
     - `payload.data` = array of events with tickets (paginated)
     - `payload.links`, `payload.meta` = pagination meta
 
-- **GET `/v1/events/{id}`**
+- **GET `/v1/api/events/{id}`**
 
   - Returns a single event with its tickets.
 
-- **POST `/v1/events`** (roles: `organizer`, `admin`)
+- **POST `/v1/api/events`** (roles: `organizer`, `admin`)
 
   - **Body**:
     - `title` (required)
@@ -181,12 +181,12 @@ All protected by `auth:sanctum`.
     - `created_by` is automatically set to the authenticated user.
     - Clears event cache.
 
-- **PUT `/v1/events/{id}`** (roles: `organizer`, `admin`)
+- **PUT `/v1/api/events/{id}`** (roles: `organizer`, `admin`)
 
   - **Organizer constraint**: can only update **their own** events; admin can update any.
   - **Body**: any of `title`, `description`, `date`, `location` (all optional but validated if present).
 
-- **DELETE `/v1/events/{id}`** (roles: `organizer`, `admin`)
+- **DELETE `/v1/api/events/{id}`** (roles: `organizer`, `admin`)
 
   - Same ownership rule as update.
 
@@ -196,7 +196,7 @@ All protected by `auth:sanctum`.
 
 All protected by `auth:sanctum` and role (`organizer`, `admin`).
 
-- **POST `/v1/events/{event_id}/tickets`**
+- **POST `/v1/api/events/{event_id}/tickets`**
 
   - **Body**:
     - `type` (string, required, e.g. `VIP`, `Standard`)
@@ -206,7 +206,7 @@ All protected by `auth:sanctum` and role (`organizer`, `admin`).
     - Organizer can only create tickets for events where `created_by = organizer.id`.
     - Admin can create for any event.
 
-- **PUT `/v1/tickets/{id}`**
+- **PUT `/v1/api/tickets/{id}`**
 
   - **Body** (optional fields):
     - `type`
@@ -215,7 +215,7 @@ All protected by `auth:sanctum` and role (`organizer`, `admin`).
   - **Ownership**:
     - Organizer may only update tickets of **their own event**.
 
-- **DELETE `/v1/tickets/{id}`**
+- **DELETE `/v1/api/tickets/{id}`**
 
   - Same ownership rule as update.
 
@@ -226,7 +226,7 @@ All protected by `auth:sanctum` and role (`organizer`, `admin`).
 Protected by `auth:sanctum` and roles (`customer`, `admin`).  
 Custom middleware `prevent.double.booking` is applied on booking creation.
 
-- **POST `/v1/tickets/{id}/bookings`**
+- **POST `/v1/api/tickets/{id}/bookings`**
 
   - **Body**:
     - `quantity` (int, required, `>=1`)
@@ -235,13 +235,13 @@ Custom middleware `prevent.double.booking` is applied on booking creation.
     - `PreventDoubleBooking` checks if the same user already has a `pending` or `confirmed` booking for this ticket.
     - Availability check ensures requested `quantity` does not exceed available quantity (`ticket.quantity - sum(pending/confirmed)`).
 
-- **GET `/v1/bookings`**
+- **GET `/v1/api/bookings`**
 
   - Lists bookings for the authenticated customer/admin:
     - Includes `ticket`, `event`, and `payment` relationships.
     - Paginated.
 
-- **PUT `/v1/bookings/{id}/cancel`**
+- **PUT `/v1/api/bookings/{id}/cancel`**
 
   - Cancels the user’s own booking:
     - Sets `booking.status = cancelled`
@@ -253,7 +253,7 @@ Custom middleware `prevent.double.booking` is applied on booking creation.
 
 Protected by `auth:sanctum` and roles (`customer`, `admin`).
 
-- **POST `/v1/bookings/{id}/payment`**
+- **POST `/v1/api/bookings/{id}/payment`**
 
   - **Behavior**:
     - Looks up booking by ID for the current user.
@@ -265,7 +265,7 @@ Protected by `auth:sanctum` and roles (`customer`, `admin`).
     - **Notification**:
       - On success, sends `BookingConfirmed` notification to the user, **queued**.
 
-- **GET `/v1/payments/{id}`**
+- **GET `/v1/api/payments/{id}`**
 
   - Returns the payment with its booking, ticket, and event.
 
@@ -347,12 +347,12 @@ You can export a Postman collection by hitting these endpoints and saving them a
 - Example request paths:
   - `{{base_url}}/v1/api/register`
   - `{{base_url}}/v1/api/login`
-  - `{{base_url}}/v1/events`
-  - `{{base_url}}/v1/events/{id}`
-  - `{{base_url}}/v1/events/{id}/tickets`
-  - `{{base_url}}/v1/tickets/{id}/bookings`
-  - `{{base_url}}/v1/bookings/{id}/payment`
-  - `{{base_url}}/v1/payments/{id}`
+  - `{{base_url}}/v1/api/events`
+  - `{{base_url}}/v1/api/events/{id}`
+  - `{{base_url}}/v1/api/events/{id}/tickets`
+  - `{{base_url}}/v1/api/tickets/{id}/bookings`
+  - `{{base_url}}/v1/api/bookings/{id}/payment`
+  - `{{base_url}}/v1/api/payments/{id}`
 
 Make sure to store the `access_token` from login as a Postman variable and apply it as a `Bearer` token for all protected endpoints.
 
