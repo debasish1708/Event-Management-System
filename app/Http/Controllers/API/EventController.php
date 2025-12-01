@@ -8,7 +8,6 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Psy\Readline\Hoa\Event as HoaEvent;
 
 class EventController extends Controller
 {
@@ -23,7 +22,9 @@ class EventController extends Controller
             $q = Event::query()->with('tickets');
             $q->searchByTitle($request->get('search'));
             $q->filterByDate($request->get('from'), $request->get('to'));
-            if($request->has('location')) $q->where('location', $request->get('location'));
+            if($request->has('location')) {
+                $q->where('location', $request->get('location'));
+            }
             return $q->orderBy('date','asc')->paginate(10);
         });
         return $this->respondWithMessageAndPayload(new EventCollection($events), 'Events retrieved successfully');
@@ -42,7 +43,24 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date' => 'required|date',
+            'location' => 'required|string|max:255',
+        ]);
+
+        $data['created_by'] = $request->user()->id;
+
+        $event = Event::create($data);
+
+        // Invalidate cached lists
+        Cache::flush();
+
+        return $this->respondCreatedWithPayload(
+            new EventResource($event),
+            'Event created successfully'
+        );
     }
 
     /**
@@ -50,8 +68,12 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-      $event = $event->with('tickets');
-      return $this->respondWithMessageAndPayload(new EventResource($event),'Event Fetch Successfully');
+        $event->load('tickets');
+
+        return $this->respondWithMessageAndPayload(
+            new EventResource($event),
+            'Event fetched successfully'
+        );
     }
 
     /**
@@ -67,7 +89,28 @@ class EventController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $event = Event::findOrFail($id);
+
+        $user = $request->user();
+        if ($user->role === 'organizer' && $event->created_by !== $user->id) {
+            return $this->respondForbidden('You can only update your own events');
+        }
+
+        $data = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'date' => 'sometimes|required|date',
+            'location' => 'sometimes|required|string|max:255',
+        ]);
+
+        $event->update($data);
+
+        Cache::flush();
+
+        return $this->respondUpdatedWithPayload(
+            new EventResource($event->fresh('tickets')),
+            'Event updated successfully'
+        );
     }
 
     /**
@@ -75,6 +118,16 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $event = Event::findOrFail($id);
+        $user = request()->user();
+
+        if ($user->role === 'organizer' && $event->created_by !== $user->id) {
+            return $this->respondForbidden('You can only delete your own events');
+        }
+
+        $event->delete();
+        Cache::flush();
+
+        return $this->respondDeleted('Event deleted successfully');
     }
 }
