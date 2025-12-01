@@ -1,0 +1,29 @@
+{
+  "menu": [
+    {
+      "url": "/dashboard",
+      "name": "Home",
+      "icon": "menu-icon tf-icons ti ti-smart-home",
+      "slug": "dashboard"
+    },
+    {
+      "url": "page-2",
+      "icon": "menu-icon tf-icons ti ti-file",
+      "name": "Page 2",
+      "slug": "pages-page-2"
+    },
+    {
+      "url": "pages/misc-error",
+      "name": "Error",
+      "icon": "menu-icon tf-icons ti ti-alert-triangle",
+      "slug": "pages-misc-error",
+      "target": "_blank"
+    },
+    {
+      "url": "/users",
+      "icon": "menu-icon tf-icons ti ti-users",
+      "name": "Users",
+      "slug": "users"
+    }
+  ]
+}
