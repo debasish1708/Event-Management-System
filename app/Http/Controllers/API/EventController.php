@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EventCollection;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Psy\Readline\Hoa\Event as HoaEvent;
 
 class EventController extends Controller
 {
@@ -23,7 +26,7 @@ class EventController extends Controller
             if($request->has('location')) $q->where('location', $request->get('location'));
             return $q->orderBy('date','asc')->paginate(10);
         });
-        return $this->respondWithMessageAndPayload($events, 'Events retrieved successfully');
+        return $this->respondWithMessageAndPayload(new EventCollection($events), 'Events retrieved successfully');
     }
 
     /**
@@ -45,9 +48,10 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Event $event)
     {
-        //
+      $event = $event->with('tickets');
+      return $this->respondWithMessageAndPayload(new EventResource($event),'Event Fetch Successfully');
     }
 
     /**

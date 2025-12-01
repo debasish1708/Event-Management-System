@@ -24,7 +24,6 @@ class AuthController extends Controller
             $message = 'Registration successful';
             return $this->respondWithMessageAndPayload(new AuthResource($user), $message);
         }catch(\Exception $ex){
-            dd($ex);
             return $this->respondBadRequest($ex->getMessage());
         }
     }
@@ -57,6 +56,9 @@ class AuthController extends Controller
     {
         try{
             $user = $request->user();
+            if (!$user) {
+                return $this->respondUnauthorized('User already logged out');
+            }
             $user->tokens()->delete();
 
             return $this->respondWithMessage('Logout successful');

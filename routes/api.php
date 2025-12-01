@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\API\BookingController;
+use App\Http\Controllers\API\EventController;
+use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\API\TicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,14 +23,28 @@ Route::middleware('api')->prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
 
+        Route::get('/events', [EventController::class,'index']);
+        Route::get('/events/{event}', [EventController::class,'show']);
+
         // Organizer-only event management
         Route::middleware('role:organizer,admin')->group(function(){
-            
+          Route::post('/events', [EventController::class,'store']);
+          Route::put('/events/{id}', [EventController::class,'update']);
+          Route::delete('/events/{id}', [EventController::class,'destroy']);
+
+          Route::post('/events/{event_id}/tickets', [TicketController::class,'store']);
+          Route::put('/tickets/{id}', [TicketController::class,'update']);
+          Route::delete('/tickets/{id}', [TicketController::class,'destroy']);
+
         });
 
         // Bookings (customer)
         Route::middleware('role:customer,admin')->group(function(){
-
+          Route::post('/tickets/{id}/bookings', [BookingController::class,'store'])->middleware('prevent.double.booking');
+          Route::get('/bookings', [BookingController::class,'index']);
+          Route::put('/bookings/{id}/cancel', [BookingController::class,'cancel']);
+          Route::post('/bookings/{id}/payment', [PaymentController::class,'pay']);
+          Route::get('/payments/{id}', [PaymentController::class,'show']);
         });
     });
 });

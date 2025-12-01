@@ -1,29 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
-use App\Models\Event;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
-class EventController extends Controller
+class BookingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // caching frequently-accessed list
-        $page = $request->get('page',1);
-        $cacheKey = "events:page:$page:".md5(json_encode($request->query()));
-        $events = Cache::remember($cacheKey, 60, function() use ($request){
-            $q = Event::query()->with('tickets');
-            $q->searchByTitle($request->get('search'));
-            $q->filterByDate($request->get('from'), $request->get('to'));
-            if($request->has('location')) $q->where('location', $request->get('location'));
-            return $q->orderBy('date','asc')->paginate(10);
-        });
-        return $this->respondWithMessageAndPayload($events, 'Events retrieved successfully');
+        //
     }
 
     /**
