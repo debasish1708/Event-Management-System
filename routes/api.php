@@ -21,7 +21,7 @@ Route::middleware('api')->prefix('v1')->group(function () {
         })->middleware('auth:sanctum')->name('api.me');
     });
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum')->prefix('api')->group(function () {
 
         Route::get('/events', [EventController::class,'index']);
         Route::get('/events/{event}', [EventController::class,'show']);
